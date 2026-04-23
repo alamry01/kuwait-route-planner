@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import GraphCanvas from "@/components/GraphCanvas";
+import GoogleMapCanvas from "@/components/GoogleMapCanvas";
 import LearnPanel from "@/components/LearnPanel";
 import { AlgoStep } from "@/lib/types";
 import { kuwaitGraph } from "@/lib/graphData";
@@ -199,47 +199,32 @@ export default function Visualizer() {
 
   const mapArea = (
     <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
-      {!startNode && (
+      {/* Non-blocking hint banner — top center, small pill */}
+      {(!startNode || (startNode && !endNode)) && (
         <div style={{
-          position: "absolute", inset: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          pointerEvents: "none", zIndex: 2,
-        }}>
-          <div style={{
-            background: "var(--panel)", border: "1px solid var(--border-soft)",
-            borderRadius: 14, padding: "16px 24px", textAlign: "center",
-            boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
-          }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 5 }}>
-              Pick a starting area
-            </div>
-            <div style={{ fontSize: 12, color: "var(--muted)" }}>
-              {isMobile ? "Tap a node or use the dropdowns below" : "Click a node or use the dropdowns above"}
-            </div>
-          </div>
-        </div>
-      )}
-      {startNode && !endNode && (
-        <div style={{
-          position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)",
-          background: "var(--panel)", border: "1px solid var(--border-soft)",
-          borderRadius: 20, padding: "8px 20px",
+          position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)",
+          background: "rgba(16,19,31,0.82)", backdropFilter: "blur(8px)",
+          border: "1px solid var(--border-soft)",
+          borderRadius: 20, padding: "6px 16px",
           zIndex: 5, pointerEvents: "none",
-          fontSize: 13, color: "var(--text)",
+          fontSize: 12, color: "var(--muted)",
           boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
           whiteSpace: "nowrap",
         }}>
-          Now pick a destination
+          {!startNode
+            ? (isMobile ? "Tap a node or use dropdowns below" : "Click a node or use dropdowns above")
+            : "Now pick a destination"}
         </div>
       )}
-      {/* Desktop reset button — top right of map */}
-      {!isMobile && (startNode || endNode) && (
+      {/* Reset button — top right */}
+      {(startNode || endNode) && !isMobile && (
         <button
           onClick={resetSelection}
           style={{
             position: "absolute", top: 12, right: 12, zIndex: 5,
             padding: "6px 13px", borderRadius: 8,
-            border: "1px solid var(--border-soft)", background: "var(--surface)",
+            border: "1px solid var(--border-soft)", background: "rgba(16,19,31,0.82)",
+            backdropFilter: "blur(8px)",
             color: "var(--muted)", fontSize: 11, fontWeight: 600,
             fontFamily: "var(--font-sora), sans-serif", cursor: "pointer",
             display: "flex", alignItems: "center", gap: 6,
@@ -248,11 +233,10 @@ export default function Visualizer() {
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--red)"; (e.currentTarget as HTMLElement).style.color = "var(--red)"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border-soft)"; (e.currentTarget as HTMLElement).style.color = "var(--muted)"; }}
         >
-          <span>↺</span> Reset
+          ↺ Reset
         </button>
       )}
-      <GraphCanvas
-        graph={kuwaitGraph}
+      <GoogleMapCanvas
         step={primaryStep}
         startNode={startNode || null}
         endNode={endNode || null}

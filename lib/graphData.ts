@@ -1,5 +1,32 @@
 import { GraphData, EdgeDef } from "./types";
 
+export const nodeLatLngs: Record<string, [number, number]> = {
+  "Kuwait City":          [29.3759, 47.9774],
+  "Salmiya":              [29.3367, 48.0705],
+  "Hawally":              [29.3331, 47.9983],
+  "Farwaniya":            [29.3076, 47.9694],
+  "Jahra":                [29.3375, 47.6581],
+  "Ahmadi":               [29.0764, 48.0840],
+  "Fahaheel":             [29.0714, 48.1319],
+  "Mangaf":               [29.0936, 48.1113],
+  "Sabah Al Salem":       [29.2467, 48.0586],
+  "Mishref":              [29.2817, 48.0405],
+  "Rumaithiya":           [29.3431, 48.0872],
+  "Jabriya":              [29.3100, 48.0224],
+  "Shuwaikh":             [29.3642, 47.9369],
+  "Fintas":               [29.1547, 48.1167],
+  "Abu Halifa":           [29.1083, 48.1247],
+  "Mahboula":             [29.0870, 48.1267],
+  "Jleeb":                [29.3053, 47.9459],
+  "Khaitan":              [29.2925, 47.9619],
+  "Salwa":                [29.2817, 48.0752],
+  "Abdulla Al Mubarak":   [29.3389, 47.8697],
+  "Sulaibikhat":          [29.3736, 47.8967],
+  "Wafra":                [28.6258, 47.9317],
+  "Sabah Al Ahmad":       [28.9850, 48.2167],
+  "Mubarak Al Kabeer":    [29.2783, 48.0833],
+};
+
 export const kuwaitGraph: GraphData = {
   nodes: [
     { id: "Kuwait City", x: 390, y: 230 },
