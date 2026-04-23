@@ -12,8 +12,21 @@ import { runAStar } from "@/lib/astar";
 type Algorithm = "dijkstra" | "astar" | "compare";
 const SPEEDS = [1400, 800, 400, 180];
 
+function useIsMobile() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return mobile;
+}
+
 export default function Visualizer() {
   const router = useRouter();
+  const isMobile = useIsMobile();
+
   const [algorithm, setAlgorithm] = useState<Algorithm>("dijkstra");
   const [startNode, setStartNode] = useState("");
   const [endNode, setEndNode] = useState("");
@@ -38,7 +51,6 @@ export default function Visualizer() {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
   }, []);
 
-  // Auto-run when both nodes selected
   useEffect(() => {
     if (!startNode || !endNode) return;
     stopTimer(); setIsPlaying(false);
@@ -74,7 +86,6 @@ export default function Visualizer() {
   const restart = useCallback(() => {
     stopTimer(); setIsPlaying(false); setDIndex(0); setAIndex(0);
   }, [stopTimer]);
-
   const resetSelection = useCallback(() => {
     stopTimer(); setIsPlaying(false);
     setStartNode(""); setEndNode("");
@@ -89,34 +100,271 @@ export default function Visualizer() {
 
   const nodes = kuwaitGraph.nodes.map((n) => n.id);
 
+  // ── Shared sub-elements ──────────────────────────────
+
+  const algoTabs = (
+    <div className="algo-tabs">
+      {(["dijkstra", "astar", "compare"] as Algorithm[]).map((alg) => (
+        <button
+          key={alg}
+          className={`algo-tab${algorithm === alg ? alg === "dijkstra" ? " active-d" : alg === "astar" ? " active-a" : " active-c" : ""}`}
+          onClick={() => setAlgorithm(alg)}
+        >
+          {alg === "dijkstra" ? "Dijkstra" : alg === "astar" ? "A*" : "Compare"}
+        </button>
+      ))}
+    </div>
+  );
+
+  const routePickers = (
+    <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 0 }}>
+      <select className="route-select" value={startNode} onChange={(e) => setStartNode(e.target.value)} style={{ flex: 1, minWidth: 0 }}>
+        <option value="">From…</option>
+        {nodes.map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+      <span style={{ fontSize: 12, color: "var(--muted)", flexShrink: 0 }}>→</span>
+      <select className="route-select" value={endNode} onChange={(e) => setEndNode(e.target.value)} style={{ flex: 1, minWidth: 0 }}>
+        <option value="">To…</option>
+        {nodes.filter((n) => n !== startNode).map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+      {(startNode || endNode) && (
+        <button
+          onClick={resetSelection}
+          style={{
+            flexShrink: 0, width: 32, height: 32,
+            borderRadius: 7, border: "1px solid var(--border-soft)",
+            background: "transparent", color: "var(--muted)",
+            cursor: "pointer", fontSize: 14,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "color 0.15s, border-color 0.15s",
+          }}
+          title="Reset selection"
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--red)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--red)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--muted)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--border-soft)"; }}
+        >↺</button>
+      )}
+    </div>
+  );
+
+  const playbackControls = hasRun ? (
+    <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+      <button className="pb-btn" onClick={restart} title="Restart">↩</button>
+      <button className="pb-btn" onClick={stepPrev} disabled={primaryIndex === 0}>‹</button>
+      <button className="pb-btn primary" onClick={() => atEnd ? restart() : setIsPlaying((p) => !p)}>
+        {isPlaying ? "⏸" : atEnd ? "↩" : "▶"}
+      </button>
+      <button className="pb-btn" onClick={stepNext} disabled={atEnd}>›</button>
+      <div className="spd-dots" style={{ marginLeft: 2 }}>
+        {SPEEDS.map((_, i) => (
+          <div key={i} className={`spd-dot${i <= speedLevel ? " on" : ""}`} onClick={() => setSpeedLevel(i)} />
+        ))}
+      </div>
+      <span style={{ fontSize: 10, color: "var(--muted)", fontVariantNumeric: "tabular-nums", marginLeft: 2, whiteSpace: "nowrap" }}>
+        {primaryIndex + 1}/{primarySteps.length}
+      </span>
+    </div>
+  ) : null;
+
+  const resultBar = primaryStep?.finalPath && algorithm !== "compare" ? (
+    <div style={{
+      background: "rgba(45,232,158,0.05)",
+      borderTop: "1px solid rgba(45,232,158,0.18)",
+      padding: "8px 16px",
+      display: "flex", alignItems: "center", gap: 10,
+      fontSize: 12, flexShrink: 0,
+    }}>
+      <span style={{ color: "var(--mint)", fontWeight: 700, flexShrink: 0 }}>Path</span>
+      <span style={{ color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, fontSize: 11 }}>
+        {primaryStep.finalPath.join(" → ")}
+      </span>
+      <span style={{ color: "var(--mint)", fontWeight: 700, fontFamily: "var(--font-mono), monospace", flexShrink: 0 }}>
+        {algorithm === "dijkstra"
+          ? `${Math.round(primaryStep.scores[primaryStep.currentNode])} km`
+          : `${Math.round(primaryStep.gScores?.[primaryStep.currentNode] ?? 0)} km`}
+      </span>
+    </div>
+  ) : null;
+
+  const learnPanel = (
+    <LearnPanel
+      steps={primarySteps}
+      currentIndex={primaryIndex}
+      algorithm={algorithm}
+      dijkstraSteps={dSteps}
+      astarSteps={aSteps}
+      dijkstraIndex={dIndex}
+      astarIndex={aIndex}
+    />
+  );
+
+  const mapArea = (
+    <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+      {!startNode && (
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          pointerEvents: "none", zIndex: 2,
+        }}>
+          <div style={{
+            background: "var(--panel)", border: "1px solid var(--border-soft)",
+            borderRadius: 14, padding: "16px 24px", textAlign: "center",
+            boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
+          }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 5 }}>
+              Pick a starting area
+            </div>
+            <div style={{ fontSize: 12, color: "var(--muted)" }}>
+              {isMobile ? "Tap a node or use the dropdowns below" : "Click a node or use the dropdowns above"}
+            </div>
+          </div>
+        </div>
+      )}
+      {startNode && !endNode && (
+        <div style={{
+          position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)",
+          background: "var(--panel)", border: "1px solid var(--border-soft)",
+          borderRadius: 20, padding: "8px 20px",
+          zIndex: 5, pointerEvents: "none",
+          fontSize: 13, color: "var(--text)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
+          whiteSpace: "nowrap",
+        }}>
+          Now pick a destination
+        </div>
+      )}
+      {/* Desktop reset button — top right of map */}
+      {!isMobile && (startNode || endNode) && (
+        <button
+          onClick={resetSelection}
+          style={{
+            position: "absolute", top: 12, right: 12, zIndex: 5,
+            padding: "6px 13px", borderRadius: 8,
+            border: "1px solid var(--border-soft)", background: "var(--surface)",
+            color: "var(--muted)", fontSize: 11, fontWeight: 600,
+            fontFamily: "var(--font-sora), sans-serif", cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 6,
+            transition: "all 0.15s", boxShadow: "0 2px 12px rgba(0,0,0,0.4)",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--red)"; (e.currentTarget as HTMLElement).style.color = "var(--red)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border-soft)"; (e.currentTarget as HTMLElement).style.color = "var(--muted)"; }}
+        >
+          <span>↺</span> Reset
+        </button>
+      )}
+      <GraphCanvas
+        graph={kuwaitGraph}
+        step={primaryStep}
+        startNode={startNode || null}
+        endNode={endNode || null}
+        onNodeClick={handleNodeClick}
+        pickingStart={!startNode}
+        pickingEnd={!!startNode && !endNode}
+      />
+    </div>
+  );
+
+  // ── MOBILE LAYOUT ────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div style={{ background: "var(--bg)", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+        {/* Compact header */}
+        <header style={{
+          background: "var(--surface)", borderBottom: "1px solid var(--border)",
+          padding: "0 16px", height: 52,
+          display: "flex", alignItems: "center", gap: 10, flexShrink: 0,
+        }}>
+          <button
+            onClick={() => router.push("/")}
+            style={{
+              width: 36, height: 36, borderRadius: 8,
+              border: "1px solid var(--border-soft)", background: "transparent",
+              color: "var(--muted)", cursor: "pointer", fontSize: 16,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >←</button>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.01em", flex: 1 }}>
+            Route Planner
+          </span>
+          <button
+            onClick={() => setLearnOpen((o) => !o)}
+            style={{
+              padding: "7px 14px", borderRadius: 8,
+              border: `1px solid ${learnOpen ? "var(--blue)" : "var(--border-soft)"}`,
+              background: learnOpen ? "var(--blue-dim)" : "transparent",
+              color: learnOpen ? "var(--blue)" : "var(--muted)",
+              fontSize: 13, fontWeight: 600,
+              fontFamily: "var(--font-sora), sans-serif", cursor: "pointer",
+            }}
+          >Learn</button>
+        </header>
+
+        {/* Map — takes all remaining space above bottom bar */}
+        <div style={{ flex: 1, overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }}>
+          {mapArea}
+          {resultBar}
+        </div>
+
+        {/* Bottom bar — algo tabs + route pickers + playback */}
+        <div className="mobile-bottom-bar">
+          {/* Row 1: algo + playback */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {algoTabs}
+            <div style={{ flex: 1 }} />
+            {playbackControls}
+          </div>
+          {/* Row 2: route selectors */}
+          {routePickers}
+        </div>
+
+        {/* Bottom sheet backdrop */}
+        <div className={`bottom-sheet-backdrop${learnOpen ? " open" : ""}`} onClick={() => setLearnOpen(false)} />
+
+        {/* Bottom sheet: Learn */}
+        <div className={`bottom-sheet${learnOpen ? " open" : ""}`}>
+          <div className="bottom-sheet-handle" />
+          <div style={{
+            padding: "10px 16px 6px",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            borderBottom: "1px solid var(--border)", flexShrink: 0,
+          }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Learn</span>
+            <button
+              onClick={() => setLearnOpen(false)}
+              style={{
+                width: 32, height: 32, borderRadius: 7,
+                border: "1px solid var(--border-soft)", background: "transparent",
+                color: "var(--muted)", cursor: "pointer", fontSize: 16,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >×</button>
+          </div>
+          <div style={{ flex: 1, overflow: "hidden" }}>
+            {learnPanel}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── DESKTOP LAYOUT ───────────────────────────────────
   return (
     <div style={{ background: "var(--bg)", height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-
-      {/* Header */}
       <header style={{
-        background: "var(--surface)",
-        borderBottom: "1px solid var(--border)",
-        padding: "0 20px",
-        height: 52,
-        display: "flex",
-        alignItems: "center",
-        gap: 16,
-        flexShrink: 0,
+        background: "var(--surface)", borderBottom: "1px solid var(--border)",
+        padding: "0 20px", height: 52,
+        display: "flex", alignItems: "center", gap: 16, flexShrink: 0,
       }}>
-        {/* Back */}
         <button
           onClick={() => router.push("/")}
           style={{
             width: 30, height: 30, borderRadius: 7,
-            border: "1px solid var(--border-soft)",
-            background: "transparent",
-            color: "var(--muted)",
-            cursor: "pointer", fontSize: 14,
+            border: "1px solid var(--border-soft)", background: "transparent",
+            color: "var(--muted)", cursor: "pointer", fontSize: 14,
             display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "color 0.15s, border-color 0.15s",
-            flexShrink: 0,
+            transition: "color 0.15s, border-color 0.15s", flexShrink: 0,
           }}
-          title="Home"
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--blue)"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--muted)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--border-soft)"; }}
         >←</button>
@@ -124,227 +372,39 @@ export default function Visualizer() {
         <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.01em", flexShrink: 0 }}>
           Route Planner
         </span>
-
-        {/* Divider */}
         <div style={{ width: 1, height: 20, background: "var(--border)", flexShrink: 0 }} />
-
-        {/* Algorithm tabs */}
-        <div className="algo-tabs" style={{ flexShrink: 0 }}>
-          {(["dijkstra", "astar", "compare"] as Algorithm[]).map((alg) => (
-            <button
-              key={alg}
-              className={`algo-tab${algorithm === alg ? alg === "dijkstra" ? " active-d" : alg === "astar" ? " active-a" : " active-c" : ""}`}
-              onClick={() => setAlgorithm(alg)}
-            >
-              {alg === "dijkstra" ? "Dijkstra" : alg === "astar" ? "A*" : "Compare"}
-            </button>
-          ))}
-        </div>
-
-        {/* Route pickers */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          <select className="route-select" value={startNode} onChange={(e) => setStartNode(e.target.value)}>
-            <option value="">From…</option>
-            {nodes.map((n) => <option key={n} value={n}>{n}</option>)}
-          </select>
-          <span style={{ fontSize: 11, color: "var(--muted)", fontWeight: 500 }}>→</span>
-          <select className="route-select" value={endNode} onChange={(e) => setEndNode(e.target.value)}>
-            <option value="">To…</option>
-            {nodes.filter((n) => n !== startNode).map((n) => <option key={n} value={n}>{n}</option>)}
-          </select>
-        </div>
-
-        {/* Playback — only when running */}
-        {hasRun && (
-          <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
-            <button className="pb-btn" onClick={restart} title="Restart">↩</button>
-            <button className="pb-btn" onClick={stepPrev} disabled={primaryIndex === 0}>‹</button>
-            <button
-              className="pb-btn primary"
-              onClick={() => atEnd ? restart() : setIsPlaying((p) => !p)}
-            >
-              {isPlaying ? "⏸" : atEnd ? "↩" : "▶"}
-            </button>
-            <button className="pb-btn" onClick={stepNext} disabled={atEnd}>›</button>
-
-            {/* Speed */}
-            <div className="spd-dots" style={{ marginLeft: 4 }}>
-              {SPEEDS.map((_, i) => (
-                <div key={i} className={`spd-dot${i <= speedLevel ? " on" : ""}`} onClick={() => setSpeedLevel(i)} />
-              ))}
-            </div>
-
-            {/* Counter */}
-            <span style={{ fontSize: 10, color: "var(--muted)", fontVariantNumeric: "tabular-nums", marginLeft: 2 }}>
-              {primaryIndex + 1}/{primarySteps.length}
-            </span>
-          </div>
-        )}
-
+        {algoTabs}
+        {routePickers}
+        {playbackControls}
         <div style={{ flex: 1 }} />
-
-        {/* Learn toggle */}
         <button
           onClick={() => setLearnOpen((o) => !o)}
           style={{
-            padding: "6px 14px",
-            borderRadius: 8,
+            padding: "6px 14px", borderRadius: 8,
             border: `1px solid ${learnOpen ? "var(--blue)" : "var(--border-soft)"}`,
             background: learnOpen ? "var(--blue-dim)" : "transparent",
             color: learnOpen ? "var(--blue)" : "var(--muted)",
-            fontSize: 12,
-            fontWeight: 600,
-            fontFamily: "var(--font-sora), sans-serif",
-            cursor: "pointer",
-            transition: "all 0.15s",
-            flexShrink: 0,
+            fontSize: 12, fontWeight: 600,
+            fontFamily: "var(--font-sora), sans-serif", cursor: "pointer",
+            transition: "all 0.15s", flexShrink: 0,
           }}
-        >
-          Learn
-        </button>
+        >Learn</button>
       </header>
 
-      {/* Body */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
-
-        {/* Map */}
-        <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
-
-          {/* Empty state */}
-          {!startNode && (
-            <div style={{
-              position: "absolute", inset: 0,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              pointerEvents: "none", zIndex: 2,
-            }}>
-              <div style={{
-                background: "var(--panel)",
-                border: "1px solid var(--border-soft)",
-                borderRadius: 14,
-                padding: "18px 28px",
-                textAlign: "center",
-                boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
-              }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", marginBottom: 5 }}>
-                  Pick a starting area
-                </div>
-                <div style={{ fontSize: 11, color: "var(--muted)" }}>
-                  Click a node on the map or use the dropdowns above
-                </div>
-              </div>
-            </div>
-          )}
-
-          {startNode && !endNode && (
-            <div style={{
-              position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)",
-              background: "var(--panel)",
-              border: "1px solid var(--border-soft)",
-              borderRadius: 20,
-              padding: "7px 18px",
-              zIndex: 5, pointerEvents: "none",
-              fontSize: 12, color: "var(--text)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
-            }}>
-              Now pick a destination
-            </div>
-          )}
-
-          {/* Reset button — top right of map */}
-          {(startNode || endNode) && (
-            <button
-              onClick={resetSelection}
-              style={{
-                position: "absolute", top: 12, right: 12, zIndex: 5,
-                padding: "6px 13px",
-                borderRadius: 8,
-                border: "1px solid var(--border-soft)",
-                background: "var(--surface)",
-                color: "var(--muted)",
-                fontSize: 11,
-                fontWeight: 600,
-                fontFamily: "var(--font-sora), sans-serif",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                transition: "all 0.15s",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.4)",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget;
-                el.style.borderColor = "var(--red)";
-                el.style.color = "var(--red)";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget;
-                el.style.borderColor = "var(--border-soft)";
-                el.style.color = "var(--muted)";
-              }}
-            >
-              <span style={{ fontSize: 12 }}>↺</span> Reset
-            </button>
-          )}
-
-          <GraphCanvas
-            graph={kuwaitGraph}
-            step={primaryStep}
-            startNode={startNode || null}
-            endNode={endNode || null}
-            onNodeClick={handleNodeClick}
-            pickingStart={!startNode}
-            pickingEnd={!!startNode && !endNode}
-          />
-        </div>
-
-        {/* Learn panel — slides in */}
+      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+        {mapArea}
         <div style={{
           width: learnOpen ? 290 : 0,
           borderLeft: learnOpen ? "1px solid var(--border)" : "none",
           background: "var(--surface)",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          flexShrink: 0,
+          overflow: "hidden", display: "flex", flexDirection: "column", flexShrink: 0,
           transition: "width 0.22s cubic-bezier(0.4,0,0.2,1)",
         }}>
-          {learnOpen && (
-            <LearnPanel
-              steps={primarySteps}
-              currentIndex={primaryIndex}
-              algorithm={algorithm}
-              dijkstraSteps={dSteps}
-              astarSteps={aSteps}
-              dijkstraIndex={dIndex}
-              astarIndex={aIndex}
-            />
-          )}
+          {learnOpen && learnPanel}
         </div>
       </div>
 
-      {/* Result bar */}
-      {primaryStep?.finalPath && algorithm !== "compare" && (
-        <div style={{
-          background: "rgba(45,232,158,0.05)",
-          borderTop: "1px solid rgba(45,232,158,0.18)",
-          padding: "8px 20px",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          fontSize: 12,
-          flexShrink: 0,
-        }}>
-          <span style={{ color: "var(--mint)", fontWeight: 700, flexShrink: 0 }}>Shortest path</span>
-          <span style={{ color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
-            {primaryStep.finalPath.join(" → ")}
-          </span>
-          <span style={{ color: "var(--mint)", fontWeight: 700, fontFamily: "var(--font-mono), monospace", flexShrink: 0 }}>
-            {algorithm === "dijkstra"
-              ? `${Math.round(primaryStep.scores[primaryStep.currentNode])} km`
-              : `${Math.round(primaryStep.gScores?.[primaryStep.currentNode] ?? 0)} km`}
-          </span>
-        </div>
-      )}
+      {resultBar}
     </div>
   );
 }

@@ -224,6 +224,73 @@ body {
   white-space: pre;
 }
 
+/* ── Mobile bottom bar ── */
+.mobile-bottom-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 10px 16px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Mobile bottom sheet ── */
+.bottom-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.bottom-sheet-backdrop.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.bottom-sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-radius: 16px 16px 0 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  height: 65vh;
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+.bottom-sheet.open {
+  transform: translateY(0);
+}
+.bottom-sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--border-soft);
+  border-radius: 2px;
+  margin: 10px auto 0;
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .mobile-bottom-bar { display: flex; }
+  .mobile-body-pad { padding-bottom: 120px; }
+
+  /* Make route selects full-width on mobile */
+  .route-select { min-width: 0; flex: 1; font-size: 13px; }
+
+  /* Larger touch area on algo tabs */
+  .algo-tab { padding: 7px 12px; font-size: 12px; }
+
+  /* Bigger playback buttons on mobile */
+  .pb-btn { width: 38px; height: 38px; font-size: 15px; }
+  .pb-btn.primary { width: 48px; height: 38px; font-size: 16px; }
+}
+
 /* ── Accessibility: respect reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

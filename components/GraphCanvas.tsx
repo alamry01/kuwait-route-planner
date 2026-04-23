@@ -128,6 +128,8 @@ export default function GraphCanvas({ graph, step, startNode, endNode, onNodeCli
 
           return (
             <g key={node.id} onClick={() => onNodeClick(node.id)} style={{ cursor: "pointer" }}>
+              {/* Invisible large touch target for mobile (44px minimum) */}
+              <circle cx={x} cy={y} r={20} fill="transparent" />
               {/* Pulse ring for current node — amber glow */}
               {isCurrent && (
                 <circle cx={x} cy={y} r={16} fill="none" stroke="#f5a623" strokeWidth="1.5" opacity="0.4">
