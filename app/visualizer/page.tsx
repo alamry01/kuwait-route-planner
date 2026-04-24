@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import GoogleMapCanvas from "@/components/GoogleMapCanvas";
 import LearnPanel from "@/components/LearnPanel";
 import { AlgoStep } from "@/lib/types";
-import { kuwaitGraph, GOVERNORATES } from "@/lib/graphData";
+import { kuwaitGraph, GOVERNORATES, nodeLatLngs } from "@/lib/graphData";
 import { runDijkstra } from "@/lib/dijkstra";
 import { runAStar } from "@/lib/astar";
 
@@ -39,6 +39,7 @@ export default function Visualizer() {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [speedLevel, setSpeedLevel] = useState(1);
+  const [showRoadRoute, setShowRoadRoute] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const primarySteps = algorithm === "astar" ? aSteps : dSteps;
@@ -53,7 +54,7 @@ export default function Visualizer() {
 
   useEffect(() => {
     if (!startNode || !endNode) return;
-    stopTimer(); setIsPlaying(false);
+    stopTimer(); setIsPlaying(false); setShowRoadRoute(true);
     if (algorithm !== "astar") { setDSteps(runDijkstra(kuwaitGraph, startNode, endNode)); setDIndex(0); }
     if (algorithm !== "dijkstra") { setASteps(runAStar(kuwaitGraph, startNode, endNode)); setAIndex(0); }
   }, [startNode, endNode, algorithm, stopTimer]);
@@ -171,25 +172,62 @@ export default function Visualizer() {
     </div>
   ) : null;
 
-  const resultBar = primaryStep?.finalPath && algorithm !== "compare" ? (
-    <div style={{
-      background: "rgba(45,232,158,0.05)",
-      borderTop: "1px solid rgba(45,232,158,0.18)",
-      padding: "8px 16px",
-      display: "flex", alignItems: "center", gap: 10,
-      fontSize: 12, flexShrink: 0,
-    }}>
-      <span style={{ color: "var(--mint)", fontWeight: 700, flexShrink: 0 }}>Path</span>
-      <span style={{ color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, fontSize: 11 }}>
-        {primaryStep.finalPath.join(" → ")}
-      </span>
-      <span style={{ color: "var(--mint)", fontWeight: 700, fontFamily: "var(--font-mono), monospace", flexShrink: 0 }}>
-        {algorithm === "dijkstra"
-          ? `${Math.round(primaryStep.scores[primaryStep.currentNode])} km`
-          : `${Math.round(primaryStep.gScores?.[primaryStep.currentNode] ?? 0)} km`}
-      </span>
-    </div>
-  ) : null;
+  const resultBar = primaryStep?.finalPath && algorithm !== "compare" ? (() => {
+    const dist = algorithm === "dijkstra"
+      ? Math.round(primaryStep.scores[primaryStep.currentNode])
+      : Math.round(primaryStep.gScores?.[primaryStep.currentNode] ?? 0);
+    const [sLat, sLng] = nodeLatLngs[startNode] ?? [0, 0];
+    const [eLat, eLng] = nodeLatLngs[endNode] ?? [0, 0];
+    const mapsUrl = `https://www.google.com/maps/dir/${sLat},${sLng}/${eLat},${eLng}`;
+    return (
+      <div style={{
+        background: "rgba(45,232,158,0.05)",
+        borderTop: "1px solid rgba(45,232,158,0.18)",
+        padding: "6px 12px",
+        display: "flex", alignItems: "center", gap: 8,
+        fontSize: 12, flexShrink: 0,
+      }}>
+        <span style={{ color: "var(--mint)", fontWeight: 700, flexShrink: 0 }}>Path</span>
+        <span style={{ color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, fontSize: 11 }}>
+          {primaryStep.finalPath.join(" → ")}
+        </span>
+        <span style={{ color: "var(--mint)", fontWeight: 700, fontFamily: "var(--font-mono), monospace", flexShrink: 0 }}>
+          {dist} km
+        </span>
+        {/* Road route toggle */}
+        <button
+          onClick={() => setShowRoadRoute((v) => !v)}
+          style={{
+            flexShrink: 0, padding: "4px 10px", borderRadius: 6, fontSize: 11,
+            border: `1px solid ${showRoadRoute ? "#4da6ff55" : "#3a456088"}`,
+            background: showRoadRoute ? "rgba(77,166,255,0.10)" : "transparent",
+            color: showRoadRoute ? "#4da6ff" : "var(--muted)",
+            cursor: "pointer", fontFamily: "var(--font-sora), sans-serif",
+            transition: "all 0.15s", whiteSpace: "nowrap",
+          }}
+        >
+          {showRoadRoute ? "Hide road" : "Show road"}
+        </button>
+        {/* Go Now */}
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            flexShrink: 0, padding: "4px 12px", borderRadius: 6, fontSize: 11,
+            background: "rgba(91,140,255,0.15)",
+            border: "1px solid rgba(91,140,255,0.4)",
+            color: "#5b8cff", fontWeight: 700,
+            fontFamily: "var(--font-sora), sans-serif",
+            textDecoration: "none", whiteSpace: "nowrap",
+            transition: "all 0.15s",
+          }}
+        >
+          Go Now ↗
+        </a>
+      </div>
+    );
+  })() : null;
 
   const learnPanel = (
     <LearnPanel
@@ -249,6 +287,7 @@ export default function Visualizer() {
         onNodeClick={handleNodeClick}
         pickingStart={!startNode}
         pickingEnd={!!startNode && !endNode}
+        showRoadRoute={showRoadRoute}
       />
     </div>
   );
