@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { AlgoStep } from "@/lib/types";
 import { kuwaitGraph, nodeLatLngs } from "@/lib/graphData";
@@ -70,6 +70,7 @@ const LEGEND = [
 
 export default function GoogleMapCanvas({ step, startNode, endNode, onNodeClick, pickingStart, pickingEnd }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showRoadRoute, setShowRoadRoute] = useState(true);
 
   // Refs that survive re-renders without triggering them
   const stateRef = useRef({ step, startNode, endNode, onNodeClick });
@@ -78,10 +79,23 @@ export default function GoogleMapCanvas({ step, startNode, endNode, onNodeClick,
   const redrawNodesRef = useRef<((s: AlgoStep | null, sn: string | null, en: string | null) => void) | null>(null);
   const directionsServiceRef = useRef<google.maps.DirectionsService | null>(null);
   const directionsRendererRef = useRef<google.maps.DirectionsRenderer | null>(null);
+  const directionsResultRef = useRef<google.maps.DirectionsResult | null>(null);
+  const showRoadRouteRef = useRef(true);
   const lastPathKeyRef = useRef<string>("");
 
   // Always keep stateRef current
   useEffect(() => { stateRef.current = { step, startNode, endNode, onNodeClick }; });
+
+  // Toggle road route overlay
+  useEffect(() => {
+    showRoadRouteRef.current = showRoadRoute;
+    if (!directionsRendererRef.current) return;
+    if (!showRoadRoute) {
+      directionsRendererRef.current.set("directions", null);
+    } else if (directionsResultRef.current) {
+      directionsRendererRef.current.setDirections(directionsResultRef.current);
+    }
+  }, [showRoadRoute]);
 
   // ── One-time map initialisation ────────────────────────
   useEffect(() => {
@@ -286,6 +300,7 @@ export default function GoogleMapCanvas({ step, startNode, endNode, onNodeClick,
     lastPathKeyRef.current = pathKey;
 
     if (!path || path.length < 2) {
+      directionsResultRef.current = null;
       directionsRendererRef.current.set("directions", null);
       return;
     }
@@ -309,7 +324,10 @@ export default function GoogleMapCanvas({ step, startNode, endNode, onNodeClick,
       },
       (result, status) => {
         if (status === "OK" && result && directionsRendererRef.current) {
-          directionsRendererRef.current.setDirections(result);
+          directionsResultRef.current = result;
+          if (showRoadRouteRef.current) {
+            directionsRendererRef.current.setDirections(result);
+          }
         }
       }
     );
@@ -320,6 +338,31 @@ export default function GoogleMapCanvas({ step, startNode, endNode, onNodeClick,
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <div ref={containerRef} style={{ width: "100%", height: "100%", cursor }} />
+
+      {/* Road route toggle — only shown when path exists */}
+      {step?.finalPath && step.finalPath.length >= 2 && (
+        <button
+          onClick={() => setShowRoadRoute((v) => !v)}
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 52,
+            background: showRoadRoute ? "rgba(45,232,158,0.12)" : "rgba(255,255,255,0.06)",
+            border: `1px solid ${showRoadRoute ? "#2de89e55" : "#3a456088"}`,
+            borderRadius: 6,
+            color: showRoadRoute ? "#2de89e" : "#8896b0",
+            fontSize: 11,
+            padding: "5px 11px",
+            cursor: "pointer",
+            fontFamily: "var(--font-sora), sans-serif",
+            backdropFilter: "blur(6px)",
+            transition: "all 0.15s",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {showRoadRoute ? "Hide road route" : "Show road route"}
+        </button>
+      )}
 
       {/* Legend */}
       <div style={{ position: "absolute", bottom: 44, left: 14, display: "flex", gap: 10, flexWrap: "wrap", pointerEvents: "none" }}>
