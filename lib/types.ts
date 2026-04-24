@@ -7,7 +7,7 @@ export interface Node {
 export interface EdgeDef {
   u: string;
   v: string;
-  weight: number;
+  weight?: number;
 }
 
 export interface GraphData {

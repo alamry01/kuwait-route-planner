@@ -19,6 +19,14 @@ public class Graph {
         }
     }
 
+    void addEdge(String u, String v) {
+        double[] pu = pos.get(u), pv = pos.get(v);
+        double w = (pu != null && pv != null)
+            ? Math.sqrt(Math.pow(pu[0] - pv[0], 2) + Math.pow(pu[1] - pv[1], 2))
+            : 1.0;
+        addEdge(u, v, w);
+    }
+
     List<Edge> neighbors(String node) {
         return adj.getOrDefault(node, Collections.emptyList());
     }
