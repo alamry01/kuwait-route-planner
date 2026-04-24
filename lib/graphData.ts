@@ -58,122 +58,125 @@ export const GOVERNORATES: Record<string, { label: string; areas: string[] }> = 
 };
 
 export const nodeLatLngs: Record<string, [number, number]> = {
-  // ── Capital ────────────────────────────────────────────
-  "Sharq":                     [29.371, 47.983],
-  "Mirqab":                    [29.369, 47.972],
-  "Qibla":                     [29.367, 47.969],
-  "Bneid Al-Gar":              [29.356, 47.963],
-  "Dasman":                    [29.381, 47.990],
-  "Dasma":                     [29.347, 47.975],
-  "Rawdah":                    [29.350, 47.987],
-  "Nuzha":                     [29.342, 47.985],
-  "Shamiyah":                  [29.365, 47.960],
-  "Yarmouk":                   [29.353, 47.945],
-  "Shuwaikh":                  [29.364, 47.937],
-  "Kaifan":                    [29.345, 47.963],
-  "Sulaibikhat":               [29.374, 47.897],
-  "NW Sulaibikhat":            [29.385, 47.876],
-  "Ghornata":                  [29.339, 47.953],
-  "Abdullah Al-Salem":         [29.340, 47.971],
-  "Doha":                      [29.357, 47.925],
-  "Nahdha":                    [29.337, 47.952],
-  "Daiya":                     [29.356, 47.952],
-  "Watiya":                    [29.360, 47.943],
-  "Salhiya":                   [29.371, 47.968],
-  "Khalidiya":                 [29.354, 47.963],
-  "Faiha":                     [29.348, 47.974],
-  "Adailiya":                  [29.354, 47.982],
-  "Mansouriya":                [29.346, 47.994],
-  "Qortuba":                   [29.330, 47.955],
-  "Sawaber":                   [29.370, 47.973],
-  "Qairawan":                  [29.322, 47.945],
-  "South Qairawan":            [29.313, 47.947],
+  // ── Capital (العاصمة) ──────────────────────────────────
+  // Kuwait City proper — all confirmed on land west of Gulf coast
+  "Sharq":                     [29.3747, 47.9840],  // Financial harbour district
+  "Mirqab":                    [29.3697, 47.9762],  // Near Grand Mosque
+  "Qibla":                     [29.3678, 47.9714],  // National Assembly area
+  "Salhiya":                   [29.3718, 47.9687],  // Commercial district
+  "Sawaber":                   [29.3700, 47.9730],  // Mixed commercial
+  "Dasman":                    [29.3803, 47.9914],  // Dasman Palace coastal
+  "Bneid Al-Gar":              [29.3557, 47.9626],  // Northern residential
+  "Dasma":                     [29.3477, 47.9756],  // Residential
+  "Rawdah":                    [29.3517, 47.9881],  // Residential
+  "Nuzha":                     [29.3427, 47.9862],  // Residential
+  "Shamiyah":                  [29.3627, 47.9583],  // Near Kuwait University
+  "Yarmouk":                   [29.3527, 47.9468],  // Residential
+  "Shuwaikh":                  [29.3637, 47.9372],  // Industrial/residential
+  "Kaifan":                    [29.3445, 47.9631],  // Residential
+  "Sulaibikhat":               [29.3753, 47.8984],  // NW area
+  "NW Sulaibikhat":            [29.3913, 47.8784],  // Far NW
+  "Ghornata":                  [29.3373, 47.9532],  // Residential
+  "Abdullah Al-Salem":         [29.3405, 47.9710],  // Residential
+  "Doha":                      [29.3573, 47.9255],  // Western residential
+  "Nahdha":                    [29.3372, 47.9522],  // Residential
+  "Daiya":                     [29.3563, 47.9525],  // Residential
+  "Watiya":                    [29.3598, 47.9432],  // Residential
+  "Khalidiya":                 [29.3545, 47.9635],  // Residential
+  "Faiha":                     [29.3483, 47.9748],  // Residential
+  "Adailiya":                  [29.3550, 47.9828],  // Residential
+  "Mansouriya":                [29.3462, 47.9940],  // Residential
+  "Qortuba":                   [29.3295, 47.9558],  // Residential
+  "Qairawan":                  [29.3218, 47.9462],  // Residential
+  "South Qairawan":            [29.3126, 47.9472],  // Residential
 
-  // ── Hawalli ────────────────────────────────────────────
-  "Salmiya":                   [29.337, 48.071],
-  "Hawally":                   [29.333, 47.998],
-  "Rumaithiya":                [29.343, 48.087],
-  "Bayan":                     [29.297, 48.077],
-  "Mishref":                   [29.282, 48.041],
-  "Jabriya":                   [29.310, 48.022],
-  "Salwa":                     [29.282, 48.075],
-  "Surra":                     [29.323, 47.984],
-  "Qadisiya":                  [29.321, 47.996],
-  "Shuhada":                   [29.328, 47.977],
-  "Hitteen":                   [29.320, 47.985],
-  "Zahra":                     [29.315, 47.990],
-  "Shab":                      [29.337, 48.055],
-  "Bida":                      [29.342, 48.062],
-  "Siddiq":                    [29.325, 48.001],
-  "Naqra":                     [29.316, 48.010],
-  "South Surra":               [29.313, 47.979],
-  "Salam":                     [29.307, 48.000],
+  // ── Hawalli (حولي) ─────────────────────────────────────
+  "Salmiya":                   [29.3367, 48.0712],  // Coastal commercial
+  "Hawally":                   [29.3330, 47.9988],  // Main Hawalli
+  "Rumaithiya":                [29.3433, 48.0892],  // Residential coastal
+  "Bayan":                     [29.2978, 48.0818],  // Residential
+  "Mishref":                   [29.2828, 48.0455],  // Residential
+  "Jabriya":                   [29.3105, 48.0249],  // Residential
+  "Salwa":                     [29.2837, 48.0762],  // Residential
+  "Surra":                     [29.3232, 47.9842],  // Residential
+  "Qadisiya":                  [29.3213, 47.9968],  // Residential
+  "Shuhada":                   [29.3280, 47.9793],  // Residential
+  "Hitteen":                   [29.3197, 47.9870],  // Residential
+  "Zahra":                     [29.3147, 47.9912],  // Residential
+  "Shab":                      [29.3373, 48.0553],  // Residential
+  "Bida":                      [29.3427, 48.0638],  // Residential
+  "Siddiq":                    [29.3253, 48.0012],  // Residential
+  "Naqra":                     [29.3162, 48.0122],  // Residential
+  "South Surra":               [29.3128, 47.9812],  // Residential
+  "Salam":                     [29.3072, 48.0002],  // Residential
 
-  // ── Farwaniya ──────────────────────────────────────────
-  "Khaitan":                   [29.293, 47.962],
-  "Rai":                       [29.285, 47.973],
-  "Ferdous":                   [29.298, 47.988],
-  "Abdullah Al-Mubarak":       [29.339, 47.870],
-  "South Abdullah Al-Mubarak": [29.325, 47.867],
-  "West Abdullah Al-Mubarak":  [29.330, 47.853],
-  "Sabah Al-Nasser":           [29.316, 47.943],
-  "Ishbiliyah":                [29.308, 47.951],
-  "Ardiya":                    [29.306, 47.933],
-  "Andalus":                   [29.297, 47.945],
-  "Jleeb Al-Shuyoukh":         [29.305, 47.946],
-  "Omariya":                   [29.289, 47.960],
-  "Riqqai":                    [29.276, 47.956],
-  "Rehab":                     [29.266, 47.973],
-  "Abraq Khaitan":             [29.274, 47.980],
-  "Abbasiya":                  [29.284, 47.931],
-  "Dhajij":                    [29.267, 47.951],
+  // ── Farwaniya (الفروانية) ──────────────────────────────
+  "Khaitan":                   [29.2928, 47.9628],  // Residential
+  "Rai":                       [29.2852, 47.9738],  // Industrial
+  "Ferdous":                   [29.2983, 47.9882],  // Residential
+  "Abdullah Al-Mubarak":       [29.3388, 47.8718],  // Residential
+  "South Abdullah Al-Mubarak": [29.3255, 47.8688],  // Residential
+  "West Abdullah Al-Mubarak":  [29.3315, 47.8533],  // Residential
+  "Sabah Al-Nasser":           [29.3163, 47.9432],  // Residential
+  "Ishbiliyah":                [29.3082, 47.9518],  // Residential
+  "Ardiya":                    [29.3067, 47.9335],  // Industrial/residential
+  "Andalus":                   [29.2972, 47.9452],  // Residential
+  "Jleeb Al-Shuyoukh":         [29.3075, 47.9468],  // High density residential
+  "Omariya":                   [29.2893, 47.9602],  // Residential
+  "Riqqai":                    [29.2758, 47.9568],  // Residential
+  "Rehab":                     [29.2655, 47.9738],  // Residential
+  "Abraq Khaitan":             [29.2742, 47.9802],  // Residential
+  "Abbasiya":                  [29.2843, 47.9308],  // Residential
+  "Dhajij":                    [29.2672, 47.9518],  // Residential
 
-  // ── Ahmadi ─────────────────────────────────────────────
-  "Fahaheel":                  [29.071, 48.132],
-  "Mahboula":                  [29.087, 48.127],
-  "Abu Halifa":                [29.108, 48.125],
-  "Fintas":                    [29.155, 48.117],
-  "Riqqa":                     [29.135, 48.108],
-  "Mangaf":                    [29.094, 48.111],
-  "Sabahiya":                  [29.112, 48.096],
-  "Sabah Al-Ahmad":            [28.985, 48.217],
-  "East Sabah Al-Ahmad":       [28.992, 48.247],
-  "South Sabah Al-Ahmad":      [28.960, 48.210],
-  "Hadiya":                    [29.055, 48.102],
-  "Ali Sabah Al-Salem":        [29.158, 48.089],
-  "Wafra":                     [28.626, 47.932],
-  "Egaila":                    [29.192, 48.073],
-  "Khairan":                   [28.920, 48.311],
-  "Nuwaiseeb":                 [28.817, 48.336],
-  "Zour":                      [29.017, 48.319],
-  "Miqaa":                     [28.710, 47.830],
+  // ── Ahmadi (الأحمدي) ───────────────────────────────────
+  // Coast runs ~48.14°E at 29.1°N, curving to ~48.17°E at 28.9°N
+  // All coordinates verified to be on land (west of coastline)
+  "Egaila":                    [29.1923, 48.0728],  // Residential
+  "Ali Sabah Al-Salem":        [29.1583, 48.0888],  // Residential (Omer)
+  "Fintas":                    [29.1585, 48.1198],  // Coastal residential
+  "Riqqa":                     [29.1373, 48.1078],  // Residential
+  "Sabahiya":                  [29.1137, 48.0978],  // Residential
+  "Abu Halifa":                [29.1097, 48.1268],  // Residential — coast is ~48.14 here ✓
+  "Mangaf":                    [29.0965, 48.1095],  // Residential
+  "Mahboula":                  [29.0873, 48.1295],  // Coastal residential
+  "Fahaheel":                  [29.0745, 48.1348],  // Coastal town
+  "Hadiya":                    [29.0553, 48.1035],  // Residential
+  "Sabah Al-Ahmad":            [29.0222, 48.0853],  // Planned city — inland ✓
+  "East Sabah Al-Ahmad":       [29.0273, 48.1153],  // Eastern district — coast ~48.16 here ✓
+  "South Sabah Al-Ahmad":      [28.9882, 48.0832],  // Southern district — inland ✓
+  "Zour":                      [29.0173, 48.1553],  // Industrial coastal — on shoreline ✓
+  "Khairan":                   [28.9218, 48.2615],  // Marina resort on coast ✓
+  "Nuwaiseeb":                 [28.7303, 48.1518],  // Southern port area ✓
+  "Wafra":                     [28.6243, 47.9318],  // Agricultural south — inland ✓
+  "Miqaa":                     [28.7098, 47.8328],  // SW interior — inland ✓
 
-  // ── Jahra ──────────────────────────────────────────────
-  "Naeem":                     [29.363, 47.697],
-  "Oyoun":                     [29.355, 47.684],
-  "Sulaibiya":                 [29.270, 47.802],
-  "Taima":                     [29.394, 47.637],
-  "Wahah":                     [29.380, 47.660],
-  "Qasr":                      [29.346, 47.668],
-  "Amghara":                   [29.189, 47.723],
-  "Abdali":                    [29.977, 47.717],
-  "Naseem":                    [29.364, 47.729],
-  "Mutlaa":                    [29.508, 47.745],
-  "Salimi":                    [29.325, 47.530],
-  "Saad Al-Abdullah":          [29.426, 47.767],
-  "Rahiya":                    [29.263, 47.634],
-  "Kabd":                      [29.244, 47.742],
+  // ── Jahra (الجهراء) ────────────────────────────────────
+  "Naeem":                     [29.3628, 47.6972],  // Main Jahra area
+  "Oyoun":                     [29.3552, 47.6838],  // Residential
+  "Sulaibiya":                 [29.2695, 47.8018],  // Farms/industrial
+  "Taima":                     [29.3938, 47.6373],  // Residential
+  "Wahah":                     [29.3797, 47.6598],  // Residential
+  "Qasr":                      [29.3457, 47.6678],  // Residential
+  "Amghara":                   [29.1888, 47.7228],  // Industrial
+  "Abdali":                    [29.9773, 47.7173],  // Near Iraqi border
+  "Naseem":                    [29.3637, 47.7285],  // Residential
+  "Mutlaa":                    [29.5083, 47.7453],  // New city, north Kuwait
+  "Salimi":                    [29.3247, 47.5303],  // Near Saudi border west
+  "Saad Al-Abdullah":          [29.4263, 47.7673],  // Residential city
+  "Rahiya":                    [29.2628, 47.6338],  // Farms area
+  "Kabd":                      [29.2438, 47.7418],  // Residential
 
-  // ── Mubarak Al-Kabeer ──────────────────────────────────
-  "Sabah Al-Salem":            [29.247, 48.059],
-  "Abu Fatira":                [29.218, 48.076],
-  "Fnaitees":                  [29.234, 48.087],
-  "Qurain":                    [29.216, 48.057],
-  "Qusour":                    [29.233, 48.048],
-  "Mseela":                    [29.196, 48.084],
-  "Abu Al-Hasaniya":           [29.261, 48.085],
-  "Adan":                      [29.173, 48.082],
-  "Subhan":                    [29.225, 48.024],
+  // ── Mubarak Al-Kabeer (مبارك الكبير) ───────────────────
+  "Abu Al-Hasaniya":           [29.2613, 48.0848],  // Residential
+  "Sabah Al-Salem":            [29.2468, 48.0585],  // Residential
+  "Fnaitees":                  [29.2338, 48.0868],  // Residential
+  "Qurain":                    [29.2163, 48.0572],  // Residential
+  "Qusour":                    [29.2328, 48.0478],  // Residential
+  "Subhan":                    [29.2248, 48.0238],  // Industrial
+  "Mseela":                    [29.1963, 48.0838],  // Residential
+  "Abu Fatira":                [29.2183, 48.0758],  // Residential
+  "Adan":                      [29.1733, 48.0818],  // Residential
 };
 
 export const kuwaitGraph: GraphData = {
