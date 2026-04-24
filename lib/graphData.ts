@@ -59,36 +59,36 @@ export const GOVERNORATES: Record<string, { label: string; areas: string[] }> = 
 
 export const nodeLatLngs: Record<string, [number, number]> = {
   // ── Capital (العاصمة) ──────────────────────────────────
-  // Kuwait City proper — all confirmed on land west of Gulf coast
-  "Sharq":                     [29.3747, 47.9840],  // Financial harbour district
-  "Mirqab":                    [29.3697, 47.9762],  // Near Grand Mosque
-  "Qibla":                     [29.3678, 47.9714],  // National Assembly area
-  "Salhiya":                   [29.3718, 47.9687],  // Commercial district
-  "Sawaber":                   [29.3700, 47.9730],  // Mixed commercial
-  "Dasman":                    [29.3803, 47.9914],  // Dasman Palace coastal
-  "Bneid Al-Gar":              [29.3557, 47.9626],  // Northern residential
-  "Dasma":                     [29.3477, 47.9756],  // Residential
-  "Rawdah":                    [29.3517, 47.9881],  // Residential
-  "Nuzha":                     [29.3427, 47.9862],  // Residential
-  "Shamiyah":                  [29.3627, 47.9583],  // Near Kuwait University
-  "Yarmouk":                   [29.3527, 47.9468],  // Residential
-  "Shuwaikh":                  [29.3637, 47.9372],  // Industrial/residential
-  "Kaifan":                    [29.3445, 47.9631],  // Residential
-  "Sulaibikhat":               [29.3753, 47.8984],  // NW area
-  "NW Sulaibikhat":            [29.3913, 47.8784],  // Far NW
-  "Ghornata":                  [29.3373, 47.9532],  // Residential
-  "Abdullah Al-Salem":         [29.3405, 47.9710],  // Residential
-  "Doha":                      [29.3573, 47.9255],  // Western residential
-  "Nahdha":                    [29.3372, 47.9522],  // Residential
-  "Daiya":                     [29.3563, 47.9525],  // Residential
-  "Watiya":                    [29.3598, 47.9432],  // Residential
-  "Khalidiya":                 [29.3545, 47.9635],  // Residential
-  "Faiha":                     [29.3483, 47.9748],  // Residential
-  "Adailiya":                  [29.3550, 47.9828],  // Residential
-  "Mansouriya":                [29.3462, 47.9940],  // Residential
-  "Qortuba":                   [29.3295, 47.9558],  // Residential
-  "Qairawan":                  [29.3218, 47.9462],  // Residential
-  "South Qairawan":            [29.3126, 47.9472],  // Residential
+  // Ring road latitudes: 1st ~29.372°N, 2nd ~29.355°N, 3rd ~29.342°N, 4th ~29.329°N, 5th ~29.316°N
+  "Sharq":                     [29.3747, 47.9840],  // Financial harbour district ✓
+  "Mirqab":                    [29.3697, 47.9762],  // Near Grand Mosque ✓
+  "Qibla":                     [29.3678, 47.9714],  // National Assembly area ✓
+  "Salhiya":                   [29.3718, 47.9687],  // Commercial district ✓
+  "Sawaber":                   [29.3700, 47.9730],  // Mixed commercial ✓
+  "Dasman":                    [29.3803, 47.9914],  // Dasman Palace coastal ✓
+  "Bneid Al-Gar":              [29.3557, 47.9626],  // Between 1st and 2nd ring ✓
+  "Dasma":                     [29.3487, 47.9756],  // Between 2nd and 3rd ring
+  "Rawdah":                    [29.3517, 47.9881],  // Near 2nd ring, east side ✓
+  "Nuzha":                     [29.3427, 47.9862],  // Near 3rd ring, east side ✓
+  "Shamiyah":                  [29.3498, 47.9583],  // Between 2nd and 3rd ring (was 29.3627)
+  "Yarmouk":                   [29.3440, 47.9468],  // Near 3rd ring, west side (was 29.3527)
+  "Shuwaikh":                  [29.3637, 47.9372],  // Industrial port, NW ✓
+  "Kaifan":                    [29.3388, 47.9631],  // Between 3rd and 4th ring (was 29.3445)
+  "Sulaibikhat":               [29.3753, 47.8984],  // NW coast ✓
+  "NW Sulaibikhat":            [29.3913, 47.8784],  // Far NW ✓
+  "Ghornata":                  [29.3268, 47.9532],  // Near 4th ring (was 29.3373)
+  "Abdullah Al-Salem":         [29.3358, 47.9710],  // Between 3rd and 4th ring (was 29.3405)
+  "Doha":                      [29.3573, 47.9255],  // Western coast, near 2nd ring ✓
+  "Nahdha":                    [29.3285, 47.9522],  // Near 4th ring (was 29.3372)
+  "Daiya":                     [29.3493, 47.9525],  // Between 2nd and 3rd ring (was 29.3563)
+  "Watiya":                    [29.3528, 47.9432],  // Between 2nd and 3rd ring (was 29.3598)
+  "Khalidiya":                 [29.3300, 47.9635],  // Between 3rd and 4th ring (was 29.3545, -2.7km fix)
+  "Faiha":                     [29.3450, 47.9748],  // Near 3rd ring (was 29.3483)
+  "Adailiya":                  [29.3500, 47.9828],  // Between 2nd and 3rd ring (was 29.3550)
+  "Mansouriya":                [29.3462, 47.9940],  // Near 3rd ring, east ✓
+  "Qortuba":                   [29.3228, 47.9558],  // Near 5th ring (was 29.3295)
+  "Qairawan":                  [29.3148, 47.9462],  // South of 5th ring (was 29.3218)
+  "South Qairawan":            [29.3058, 47.9472],  // Far south (was 29.3126)
 
   // ── Hawalli (حولي) ─────────────────────────────────────
   "Salmiya":                   [29.3367, 48.0712],  // Coastal commercial
