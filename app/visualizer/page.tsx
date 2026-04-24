@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import GoogleMapCanvas from "@/components/GoogleMapCanvas";
 import LearnPanel from "@/components/LearnPanel";
 import { AlgoStep } from "@/lib/types";
-import { kuwaitGraph } from "@/lib/graphData";
+import { kuwaitGraph, GOVERNORATES } from "@/lib/graphData";
 import { runDijkstra } from "@/lib/dijkstra";
 import { runAStar } from "@/lib/astar";
 
@@ -98,8 +98,6 @@ export default function Visualizer() {
     if (!endNode && id !== startNode) { setEndNode(id); }
   }, [startNode, endNode]);
 
-  const nodes = kuwaitGraph.nodes.map((n) => n.id);
-
   // ── Shared sub-elements ──────────────────────────────
 
   const algoTabs = (
@@ -120,12 +118,20 @@ export default function Visualizer() {
     <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 0 }}>
       <select className="route-select" value={startNode} onChange={(e) => setStartNode(e.target.value)} style={{ flex: 1, minWidth: 0 }}>
         <option value="">From…</option>
-        {nodes.map((n) => <option key={n} value={n}>{n}</option>)}
+        {Object.values(GOVERNORATES).map((gov) => (
+          <optgroup key={gov.label} label={gov.label}>
+            {gov.areas.map((n) => <option key={n} value={n}>{n}</option>)}
+          </optgroup>
+        ))}
       </select>
       <span style={{ fontSize: 12, color: "var(--muted)", flexShrink: 0 }}>→</span>
       <select className="route-select" value={endNode} onChange={(e) => setEndNode(e.target.value)} style={{ flex: 1, minWidth: 0 }}>
         <option value="">To…</option>
-        {nodes.filter((n) => n !== startNode).map((n) => <option key={n} value={n}>{n}</option>)}
+        {Object.values(GOVERNORATES).map((gov) => (
+          <optgroup key={gov.label} label={gov.label}>
+            {gov.areas.filter((n) => n !== startNode).map((n) => <option key={n} value={n}>{n}</option>)}
+          </optgroup>
+        ))}
       </select>
       {(startNode || endNode) && (
         <button

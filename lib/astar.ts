@@ -1,10 +1,12 @@
 import { AlgoStep, GraphData, PQEntry } from "./types";
-import { getNeighbors } from "./graphData";
+import { getNeighbors, nodeLatLngs } from "./graphData";
 
-function heuristic(graph: GraphData, a: string, b: string): number {
-  const nodeA = graph.nodes.find((n) => n.id === a)!;
-  const nodeB = graph.nodes.find((n) => n.id === b)!;
-  return Math.sqrt(Math.pow(nodeA.x - nodeB.x, 2) + Math.pow(nodeA.y - nodeB.y, 2)) * 0.3;
+function heuristic(_graph: GraphData, a: string, b: string): number {
+  const [latA, lngA] = nodeLatLngs[a] ?? [0, 0];
+  const [latB, lngB] = nodeLatLngs[b] ?? [0, 0];
+  const dlat = (latA - latB) * 111;
+  const dlng = (lngA - lngB) * 97;
+  return Math.sqrt(dlat * dlat + dlng * dlng);
 }
 
 function reconstructPath(prev: Record<string, string | null>, end: string): string[] {
@@ -34,7 +36,7 @@ export function runAStar(graph: GraphData, start: string, end: string): AlgoStep
   }
 
   gScore[start] = 0;
-  const h0 = heuristic(graph, start, end);
+  const h0 = heuristic(graph,start, end);
   fScore[start] = h0;
   hScore[start] = h0;
 
@@ -92,7 +94,7 @@ export function runAStar(graph: GraphData, start: string, end: string): AlgoStep
       const tentG = gScore[u] + weight;
       if (tentG < gScore[dest]) {
         const oldF = fScore[dest];
-        const h = heuristic(graph, dest, end);
+        const h = heuristic(graph,dest, end);
         gScore[dest] = tentG;
         hScore[dest] = h;
         fScore[dest] = tentG + h;
@@ -115,7 +117,7 @@ export function runAStar(graph: GraphData, start: string, end: string): AlgoStep
       hScores: { ...hScore },
       prev: { ...prev },
       updatedNeighbors,
-      explanation: buildAStarExplanation(u, gScore[u], heuristic(graph, u, end), updatedNeighbors),
+      explanation: buildAStarExplanation(u, gScore[u], heuristic(graph,u, end), updatedNeighbors),
       concept: "relax",
     });
   }

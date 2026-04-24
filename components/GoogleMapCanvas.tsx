@@ -89,8 +89,8 @@ export default function GoogleMapCanvas({ step, startNode, endNode, onNodeClick,
       if (cancelled || !containerRef.current) return;
 
       const map = new window.google.maps.Map(containerRef.current, {
-        center: { lat: 29.18, lng: 47.95 },
-        zoom: 10,
+        center: { lat: 29.1, lng: 47.95 },
+        zoom: 9,
         styles: MAP_STYLE,
         disableDefaultUI: true,
         gestureHandling: "greedy",

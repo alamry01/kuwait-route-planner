@@ -91,7 +91,7 @@ export default function GraphCanvas({ graph, step, startNode, endNode, onNodeCli
         {graph.edges.map((e) => {
           const a = nodeMap[e.u], b = nodeMap[e.v];
           if (!a || !b) return null;
-          const x1 = tx(a.x), y1 = ty(a.y), x2 = tx(b.x), y2 = ty(b.y);
+          const x1 = tx(a.x ?? 0), y1 = ty(a.y ?? 0), x2 = tx(b.x ?? 0), y2 = ty(b.y ?? 0);
           const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
           const onPath = isPathEdge(e.u, e.v, step?.finalPath);
           const relaxed = isRelaxedEdge(e.u, e.v, step);
@@ -119,7 +119,7 @@ export default function GraphCanvas({ graph, step, startNode, endNode, onNodeCli
 
         {/* Nodes */}
         {graph.nodes.map((node) => {
-          const x = tx(node.x), y = ty(node.y);
+          const x = tx(node.x ?? 0), y = ty(node.y ?? 0);
           const { fill, ring } = nodeColor(node.id, step, startNode, endNode);
           const isCurrent = step?.currentNode === node.id && !step?.finalPath;
           const isOnPath = step?.finalPath?.includes(node.id);
